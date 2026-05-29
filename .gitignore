@@ -1,0 +1,19 @@
+# Auth tokens
+.auth/
+*.oauth.json
+xai-oauth.json
+
+# OS / editor
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Node
+node_modules/
+npm-debug.log
+
+# Misc
+*.log
+env.local
