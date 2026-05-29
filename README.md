@@ -16,8 +16,8 @@ This gives you the same high-quality `x_search` tool that powers Grok inside the
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/xai-xsearch.git ~/repos/xai-xsearch
-cd ~/repos/xai-xsearch
+git clone https://github.com/YOUR_USERNAME/xai-xsearch.git ~/Developer/personal-projects/xai-xsearch
+cd ~/Developer/personal-projects/xai-xsearch
 ```
 
 ### 2. Install / link it
@@ -37,7 +37,7 @@ You can also do it manually:
 
 ```bash
 mkdir -p ~/.agents/tools/xai-xsearch
-ln -s ~/repos/xai-xsearch/scripts ~/.agents/tools/xai-xsearch/scripts
+ln -s ~/Developer/personal-projects/xai-xsearch/scripts ~/.agents/tools/xai-xsearch/scripts
 ```
 
 ### 3. Authenticate with X Premium (one time)
@@ -110,7 +110,7 @@ This file is gitignored.
 ## Updating
 
 ```bash
-cd ~/repos/xai-xsearch
+cd ~/Developer/personal-projects/xai-xsearch
 git pull
 ./install.sh
 ```

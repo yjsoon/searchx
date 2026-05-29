@@ -6,6 +6,9 @@ echo "Installing xai-xsearch..."
 CANONICAL_DIR="$HOME/.agents/tools/xai-xsearch"
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Default recommended clone location
+DEFAULT_TARGET="$HOME/Developer/personal-projects/xai-xsearch"
+
 # Create canonical location
 mkdir -p "$CANONICAL_DIR"
 mkdir -p "$CANONICAL_DIR/.auth"
