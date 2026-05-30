@@ -11,12 +11,15 @@
 ## Project Shape
 
 - The repo is the source of truth.
+- The user-facing command and skill name are `xsearch`.
 - The installed runtime is `~/.agents/tools/xai-xsearch/`.
 - Agent-specific skills under `skills/` and in home-directory skill folders should stay thin pointers to the shared runtime.
 - Do not move core OAuth or search logic into a single agent framework.
 
 ## Verification
 
+- `node bin/xsearch.js --help` should print usage.
+- `node bin/xsearch.js auth status` should run without throwing.
 - `node scripts/xai-oauth.js --status` should run without throwing.
 - `node scripts/xai-oauth.js --login` should reach the xAI device-code prompt.
 - `node scripts/xai-search.js --help` should print usage.

@@ -1,0 +1,16 @@
+{
+  "name": "xsearch",
+  "version": "0.1.0",
+  "description": "Native X search CLI backed by xAI OAuth and the x_search Responses tool.",
+  "license": "MIT",
+  "type": "commonjs",
+  "bin": {
+    "xsearch": "./bin/xsearch.js"
+  },
+  "scripts": {
+    "check": "node scripts/xai-oauth.js --status && node scripts/xai-search.js --help && node bin/xsearch.js --help"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
