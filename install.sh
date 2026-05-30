@@ -13,13 +13,31 @@ DEFAULT_TARGET="$HOME/Developer/personal-projects/xai-xsearch"
 mkdir -p "$CANONICAL_DIR"
 mkdir -p "$CANONICAL_DIR/.auth"
 
-# Symlink the scripts directory
-if [ -L "$CANONICAL_DIR/scripts" ] || [ -e "$CANONICAL_DIR/scripts" ]; then
-  rm -rf "$CANONICAL_DIR/scripts"
+replace_with_symlink() {
+  local source="$1"
+  local target="$2"
+
+  if [ -L "$target" ] || [ -e "$target" ]; then
+    if command -v trash >/dev/null 2>&1; then
+      trash "$target"
+    else
+      mv "$target" "$target.bak.$(date +%Y%m%d%H%M%S)"
+    fi
+  fi
+  ln -s "$source" "$target"
+}
+
+replace_with_symlink "$REPO_DIR/scripts" "$CANONICAL_DIR/scripts"
+replace_with_symlink "$REPO_DIR/README.md" "$CANONICAL_DIR/README.md"
+if [ -f "$REPO_DIR/AGENTS.md" ]; then
+  replace_with_symlink "$REPO_DIR/AGENTS.md" "$CANONICAL_DIR/AGENTS.md"
 fi
-ln -s "$REPO_DIR/scripts" "$CANONICAL_DIR/scripts"
 
 echo "✓ Scripts linked to $CANONICAL_DIR/scripts"
+echo "✓ README linked to $CANONICAL_DIR/README.md"
+if [ -f "$REPO_DIR/AGENTS.md" ]; then
+  echo "✓ AGENTS linked to $CANONICAL_DIR/AGENTS.md"
+fi
 
 # Create thin skill pointers (best effort)
 create_thin_skill() {

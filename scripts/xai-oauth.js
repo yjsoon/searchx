@@ -15,14 +15,15 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 
-const TOKEN_FILE = path.join(process.env.HOME, '.agents/tools/xai-xsearch/.auth/xai-oauth.json');
+const TOKEN_FILE = process.env.XAI_OAUTH_TOKEN_FILE ||
+  path.join(process.env.HOME, '.agents/tools/xai-xsearch/.auth/xai-oauth.json');
 
 const AUTH_BASE = 'https://auth.x.ai';
 const DEVICE_CODE_URL = `${AUTH_BASE}/oauth2/device/code`;
 const TOKEN_URL = `${AUTH_BASE}/oauth2/token`;
 
-// Common client used by CLI tools for Grok / xAI (this is the shared one many tools use)
-const DEFAULT_CLIENT_ID = process.env.XAI_OAUTH_CLIENT_ID || 'grok-cli';
+const DEFAULT_CLIENT_ID = process.env.XAI_OAUTH_CLIENT_ID || 'b1a00492-073a-47ea-816f-4c329264a828';
+const DEFAULT_SCOPE = process.env.XAI_OAUTH_SCOPE || 'openid profile email offline_access grok-cli:access api:access';
 
 function request(method, url, body, headers = {}) {
   return new Promise((resolve, reject) => {
@@ -33,6 +34,7 @@ function request(method, url, body, headers = {}) {
       path: urlObj.pathname + urlObj.search,
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
+        'Accept': 'application/json',
         'User-Agent': 'xai-xsearch-skill/0.1',
         ...headers,
       },
@@ -66,7 +68,7 @@ function request(method, url, body, headers = {}) {
 function saveTokens(tokens) {
   const dir = path.dirname(TOKEN_FILE);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(TOKEN_FILE, JSON.stringify(tokens, null, 2), 'utf8');
+  fs.writeFileSync(TOKEN_FILE, JSON.stringify(tokens, null, 2), { encoding: 'utf8', mode: 0o600 });
   console.log(`Saved tokens to ${TOKEN_FILE}`);
 }
 
@@ -81,7 +83,7 @@ async function deviceLogin() {
   // Step 1: Request device code
   const params = new URLSearchParams({
     client_id: DEFAULT_CLIENT_ID,
-    scope: 'openid profile email offline_access grok-cli:access api:access',
+    scope: DEFAULT_SCOPE,
   });
 
   let deviceResp;
@@ -89,11 +91,12 @@ async function deviceLogin() {
     deviceResp = await request('POST', DEVICE_CODE_URL, params.toString());
   } catch (e) {
     console.error('Failed to start device flow:', e.message);
-    console.error('\nYou may need a different client_id. Check OpenClaw or Hermes Agent source for the current shared client.');
+    console.error('\nYou may need a different client_id. Set XAI_OAUTH_CLIENT_ID and retry.');
     process.exit(1);
   }
 
   const { device_code, user_code, verification_uri, verification_uri_complete, interval = 5, expires_in } = deviceResp;
+  let pollInterval = interval;
 
   console.log('Please open this URL in any browser and enter the code:');
   console.log(verification_uri_complete || `${verification_uri}\nCode: ${user_code}`);
@@ -110,7 +113,7 @@ async function deviceLogin() {
   const maxWait = (expires_in || 900) * 1000;
 
   while (Date.now() - start < maxWait) {
-    await new Promise(r => setTimeout(r, interval * 1000));
+    await new Promise(r => setTimeout(r, pollInterval * 1000));
 
     const body = new URLSearchParams(tokenParamsBase).toString();
 
@@ -126,7 +129,7 @@ async function deviceLogin() {
           obtained_at: new Date().toISOString(),
         };
         saveTokens(toSave);
-        console.log('\n✅ Login successful! You can now use real x_search with your X Premium subscription.');
+        console.log('\nLogin successful. You can now use real x_search with your X Premium subscription.');
         return;
       }
     } catch (err) {
@@ -136,7 +139,7 @@ async function deviceLogin() {
         continue;
       }
       if (msg.includes('slow_down')) {
-        // increase interval slightly
+        pollInterval += 5;
         continue;
       }
       if (msg.includes('expired_token') || msg.includes('access_denied')) {
@@ -203,6 +206,13 @@ if (cmd === '--login' || cmd === 'login') {
   refresh();
 } else if (cmd === '--status' || cmd === 'status') {
   status();
+} else if (cmd === '--help' || cmd === 'help' || cmd === '-h') {
+  console.log('Usage: node xai-oauth.js [--login | --status | --refresh]');
+  console.log('');
+  console.log('Environment:');
+  console.log('  XAI_OAUTH_CLIENT_ID   Override the shared xAI OAuth client ID');
+  console.log('  XAI_OAUTH_SCOPE       Override requested OAuth scopes');
+  console.log('  XAI_OAUTH_TOKEN_FILE  Override token file path');
 } else {
   console.log('Usage: node xai-oauth.js [--login | --status | --refresh]');
 }
