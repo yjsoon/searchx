@@ -4,6 +4,8 @@ Reusable native X search for local agents, backed by xAI's `x_search` Responses 
 
 This repo is the canonical implementation for the `xsearch` command. Agent-specific skills should stay thin and point back to the installed runtime at `~/.agents/tools/xai-xsearch/`.
 
+This is an unofficial tool. It is not affiliated with, endorsed by, or sponsored by xAI or X Corp.
+
 ## Current Status
 
 - OAuth device-code login now works with xAI's shared OAuth client ID.
@@ -20,6 +22,21 @@ This repo is the canonical implementation for the `xsearch` command. Agent-speci
 - Shell access on a machine that can open or copy the xAI device-code login URL.
 
 ## Install
+
+After the package is published to npm:
+
+```bash
+npm install -g @yjsoon/xsearch
+```
+
+Then verify:
+
+```bash
+xsearch --help
+xsearch settings
+```
+
+For local development from this repository:
 
 ```bash
 git clone https://github.com/yjsoon/xai-xsearch.git ~/Developer/personal-projects/xai-xsearch
@@ -58,27 +75,40 @@ ls ~/.grok/skills/xsearch/SKILL.md
 ## Authenticate
 
 ```bash
-xsearch auth login
+xsearch login
 ```
 
 Open the printed URL, enter the code, and finish sign-in with an eligible xAI/X account. Check the result with:
 
 ```bash
-xsearch auth status
+xsearch status
 ```
 
 Refresh an expired token manually:
 
 ```bash
-xsearch auth refresh
+xsearch refresh
 ```
 
 Tokens are stored at `~/.agents/tools/xai-xsearch/.auth/xai-oauth.json` with owner-only file permissions when the script creates the file. Treat it as a credential.
+
+To inspect paths, endpoint, model, and environment overrides:
+
+```bash
+xsearch settings
+xsearch settings --json
+```
 
 ## Search
 
 ```bash
 xsearch search "What are people saying about xAI on X?"
+```
+
+The query can also be passed directly:
+
+```bash
+xsearch "What are people saying about xAI on X?"
 ```
 
 Use filters when useful:
@@ -112,17 +142,18 @@ XAI_API_BASE            Override Responses API base URL; defaults to https://api
 XAI_X_SEARCH_MODEL      Override default search model; defaults to grok-4-1-fast-non-reasoning
 ```
 
+Run `xsearch help`, `xsearch help search`, or `xsearch help settings` for command-specific usage.
+
 ## For Agents
 
 For a fresh install, run:
 
 ```bash
-git clone https://github.com/yjsoon/xai-xsearch.git ~/Developer/personal-projects/xai-xsearch
-cd ~/Developer/personal-projects/xai-xsearch
-./install.sh
+npm install -g @yjsoon/xsearch
 
-xsearch --help || ~/.local/bin/xsearch --help
-xsearch auth status || ~/.local/bin/xsearch auth status
+xsearch --help
+xsearch settings --json
+xsearch status
 ```
 
 If `xsearch` is not on `PATH`, use `~/.local/bin/xsearch` in commands.
@@ -130,7 +161,7 @@ If `xsearch` is not on `PATH`, use `~/.local/bin/xsearch` in commands.
 For first-time auth, run the login command in a shell that can stay open, such as a tmux pane or another long-running command session:
 
 ```bash
-xsearch auth login
+xsearch login
 ```
 
 Return the printed device-code URL/code to the user so they can finish login in a browser. If there is no token or the token has expired, run `xsearch auth login` or `xsearch auth refresh` as appropriate.
@@ -179,6 +210,12 @@ The design goal is decentralised reuse: clone this repo, run `./install.sh`, and
 - Official xAI X Search docs: https://docs.x.ai/developers/tools/x-search
 - OpenClaw xAI provider docs: https://docs.openclaw.ai/providers/xai
 - OpenClaw implementation reference: https://github.com/openclaw/openclaw/tree/main/extensions/xai
+
+## Licence and Attribution
+
+This project is MIT licensed. See `LICENSE`.
+
+The xAI OAuth and `x_search` implementation details were adapted from OpenClaw's MIT-licensed xAI provider. See `THIRD_PARTY_NOTICES.md` for the upstream notice.
 
 ## Roadmap
 

@@ -61,6 +61,23 @@ function loadTokens() {
   return JSON.parse(fs.readFileSync(TOKEN_FILE, 'utf8'));
 }
 
+function getAuthSettings() {
+  const tokens = loadTokens();
+  const expiresAt = tokens?.expires_at ? new Date(tokens.expires_at).toISOString() : null;
+  return {
+    authBase: AUTH_BASE,
+    clientId: DEFAULT_CLIENT_ID,
+    clientIdSource: process.env.XAI_OAUTH_CLIENT_ID ? 'XAI_OAUTH_CLIENT_ID' : 'shared default',
+    scope: DEFAULT_SCOPE,
+    scopeSource: process.env.XAI_OAUTH_SCOPE ? 'XAI_OAUTH_SCOPE' : 'shared default',
+    tokenFile: TOKEN_FILE,
+    hasToken: !!tokens?.access_token,
+    hasRefreshToken: !!tokens?.refresh_token,
+    expiresAt,
+    expired: tokens?.expires_at ? Date.now() > tokens.expires_at : null,
+  };
+}
+
 function loadAccessToken() {
   const tokens = loadTokens();
   if (!tokens) {
@@ -177,6 +194,7 @@ function status() {
 }
 
 module.exports = {
+  getAuthSettings,
   loadAccessToken,
   login,
   refresh,

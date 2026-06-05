@@ -1,5 +1,5 @@
-const { login, refresh, status } = require('./auth');
-const { DEFAULT_MODEL, extractText, search } = require('./search');
+const { getAuthSettings, login, refresh, status } = require('./auth');
+const { API_BASE, DEFAULT_MODEL, extractText, search } = require('./search');
 
 function requireValue(args, flag, index) {
   const value = args[index + 1];
@@ -71,18 +71,24 @@ function printUsage() {
   console.log('Usage: xsearch <command> [options]');
   console.log('');
   console.log('Commands:');
+  console.log('  login                   Start device-code login');
+  console.log('  status                  Show local OAuth token status');
+  console.log('  refresh                 Refresh the OAuth token');
   console.log('  search <query>          Search X with xAI x_search');
-  console.log('  auth login              Start device-code login');
-  console.log('  auth status             Show local OAuth token status');
-  console.log('  auth refresh            Refresh the OAuth token');
+  console.log('  settings                Show paths, model, endpoint, and environment overrides');
+  console.log('  help [command]          Show command help');
   console.log('');
-  console.log('Shortcuts:');
-  console.log('  xsearch <query>         Same as xsearch search <query>');
-  console.log('  xsearch login           Same as xsearch auth login');
+  console.log('Examples:');
+  console.log('  xsearch login');
+  console.log('  xsearch status');
+  console.log('  xsearch search "What are people saying about xAI?"');
+  console.log('  xsearch "WWDC reactions from Apple developers" --since 2026-06-01 --handles apple,gruber');
+  console.log('  xsearch settings --json');
 }
 
 function printSearchUsage() {
   console.log('Usage: xsearch search "your search" [options]');
+  console.log('       xsearch "your search" [options]');
   console.log('');
   console.log('Options:');
   console.log('  --query, -q TEXT                  Search query');
@@ -95,15 +101,101 @@ function printSearchUsage() {
   console.log('  --model MODEL                     Override xAI Responses model');
   console.log('  --max-output-tokens N             Override output token cap');
   console.log('  --json                            Print only the raw Responses API JSON to stdout');
+  console.log('');
+  console.log('Examples:');
+  console.log('  xsearch search "latest posts about Grok"');
+  console.log('  xsearch "shipping updates from xAI" --since 2026-06-01');
+  console.log('  xsearch "from selected accounts" --handles xai,elonmusk --json');
 }
 
 function printAuthUsage() {
   console.log('Usage: xsearch auth [login | status | refresh]');
+  console.log('       xsearch login | status | refresh');
   console.log('');
+  console.log('Commands:');
+  console.log('  login       Start device-code login');
+  console.log('  status      Show local OAuth token status');
+  console.log('  refresh     Refresh the OAuth token');
+  console.log('');
+  printEnvironmentHelp();
+}
+
+function printSettingsUsage() {
+  console.log('Usage: xsearch settings [--json]');
+  console.log('');
+  console.log('Shows local token path, token presence, API base, default model, and environment overrides.');
+  console.log('');
+  printEnvironmentHelp();
+}
+
+function printEnvironmentHelp() {
   console.log('Environment:');
   console.log('  XAI_OAUTH_CLIENT_ID     Override the shared xAI OAuth client ID');
   console.log('  XAI_OAUTH_SCOPE         Override requested OAuth scopes');
   console.log('  XAI_OAUTH_TOKEN_FILE    Override token file path');
+  console.log('  XAI_API_BASE            Override Responses API base URL');
+  console.log('  XAI_X_SEARCH_MODEL      Override default search model');
+}
+
+function parseJsonFlag(args, usage) {
+  let json = false;
+  for (const arg of args) {
+    if (arg === '--json') json = true;
+    else if (arg === '--help' || arg === '-h' || arg === 'help') {
+      usage();
+      return null;
+    }
+    else throw new Error(`Unknown option: ${arg}`);
+  }
+  return { json };
+}
+
+function printSettings(args = []) {
+  const opts = parseJsonFlag(args, printSettingsUsage);
+  if (!opts) return;
+
+  const auth = getAuthSettings();
+  const settings = {
+    apiBase: API_BASE,
+    defaultModel: DEFAULT_MODEL,
+    tokenFile: auth.tokenFile,
+    hasToken: auth.hasToken,
+    hasRefreshToken: auth.hasRefreshToken,
+    expiresAt: auth.expiresAt,
+    expired: auth.expired,
+    oauth: {
+      authBase: auth.authBase,
+      clientId: auth.clientId,
+      clientIdSource: auth.clientIdSource,
+      scope: auth.scope,
+      scopeSource: auth.scopeSource,
+    },
+    environment: {
+      XAI_OAUTH_CLIENT_ID: process.env.XAI_OAUTH_CLIENT_ID || null,
+      XAI_OAUTH_SCOPE: process.env.XAI_OAUTH_SCOPE || null,
+      XAI_OAUTH_TOKEN_FILE: process.env.XAI_OAUTH_TOKEN_FILE || null,
+      XAI_API_BASE: process.env.XAI_API_BASE || null,
+      XAI_X_SEARCH_MODEL: process.env.XAI_X_SEARCH_MODEL || null,
+    },
+  };
+
+  if (opts.json) {
+    console.log(JSON.stringify(settings, null, 2));
+    return;
+  }
+
+  console.log('xsearch settings:');
+  console.log(`  API base: ${settings.apiBase}`);
+  console.log(`  Default model: ${settings.defaultModel}`);
+  console.log(`  Token file: ${settings.tokenFile}`);
+  console.log(`  Has token: ${settings.hasToken ? 'yes' : 'no'}`);
+  console.log(`  Has refresh token: ${settings.hasRefreshToken ? 'yes' : 'no'}`);
+  console.log(`  Expires at: ${settings.expiresAt || '(unknown)'}`);
+  console.log(`  Expired: ${settings.expired === null ? '(unknown)' : settings.expired ? 'yes' : 'no'}`);
+  console.log(`  OAuth client ID: ${settings.oauth.clientId} (${settings.oauth.clientIdSource})`);
+  console.log(`  OAuth scope: ${settings.oauth.scope} (${settings.oauth.scopeSource})`);
+  console.log('');
+  printEnvironmentHelp();
 }
 
 async function runSearch(args) {
@@ -156,11 +248,19 @@ async function main(args) {
   const cmd = args[0];
 
   if (!cmd || cmd === '--help' || cmd === '-h' || cmd === 'help') {
+    if (cmd === 'help' && args[1]) {
+      const topic = args[1];
+      if (topic === 'search') return printSearchUsage();
+      if (topic === 'auth' || topic === 'login' || topic === 'status' || topic === 'refresh') return printAuthUsage();
+      if (topic === 'settings' || topic === 'config') return printSettingsUsage();
+      throw new Error(`Unknown help topic: ${topic}`);
+    }
     printUsage();
     return;
   }
   if (cmd === 'search') return runSearch(args.slice(1));
   if (cmd === 'auth') return runAuth(args.slice(1));
+  if (cmd === 'settings' || cmd === 'config') return printSettings(args.slice(1));
   if (cmd === 'login' || cmd === '--login') return login();
   if (cmd === 'refresh' || cmd === '--refresh') return refresh();
   if (cmd === 'status' || cmd === '--status') return status();
@@ -171,6 +271,7 @@ async function main(args) {
 module.exports = {
   main,
   parseSearchArgs,
+  printSettings,
   printUsage,
   runSearch,
 };

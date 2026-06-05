@@ -1,9 +1,12 @@
 {
-  "name": "xsearch",
+  "name": "@yjsoon/xsearch",
   "version": "0.1.0",
   "description": "Native X search CLI backed by xAI OAuth and the x_search Responses tool.",
   "license": "MIT",
   "type": "commonjs",
+  "publishConfig": {
+    "access": "public"
+  },
   "bin": {
     "xsearch": "./bin/xsearch.js"
   },

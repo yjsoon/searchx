@@ -93,6 +93,7 @@ async function search(opts) {
 }
 
 module.exports = {
+  API_BASE,
   DEFAULT_MODEL,
   extractText,
   search,
