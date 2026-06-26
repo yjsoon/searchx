@@ -1,29 +1,44 @@
 # xsearch
 
-Reusable native X search for local agents, backed by xAI's `x_search` Responses API tool and the user's eligible Grok, SuperGrok, or X Premium OAuth entitlement.
+Search X from the terminal with xAI's `x_search` Responses API tool.
 
-This repo is the canonical implementation for the `xsearch` command. Agent-specific skills should stay thin and point back to the installed runtime at `~/.agents/tools/xai-xsearch/`.
+This repo is the canonical implementation for the `xsearch` command. Agent-specific skills should stay thin and call the shared `xsearch` CLI instead of carrying their own OAuth or search implementation.
 
-This is an unofficial tool. It is not affiliated with, endorsed by, or sponsored by xAI or X Corp.
+This is an unofficial local tool. It is not affiliated with, endorsed by, or sponsored by xAI or X Corp.
 
 ## Current Status
 
+- Published to npm as `@yjsoon/xsearch`.
 - OAuth device-code login now works with xAI's shared OAuth client ID.
 - Tokens are stored locally in `~/.agents/tools/xai-xsearch/.auth/xai-oauth.json`.
 - Search calls go to `https://api.x.ai/v1/responses` with `tools: [{ "type": "x_search" }]`.
+- `xsearch` does not scrape the X website or automate a browser.
 - Terminal usage is supported through the `xsearch` command; MCP packaging is not implemented yet.
 - Token refresh is manual with `xsearch auth refresh`.
+
+## What This Does
+
+`xsearch` gives local agents and humans a small CLI for real X search:
+
+```bash
+xsearch search "What are people saying about xAI on X?"
+```
+
+Under the hood it authenticates with xAI OAuth, then calls the Responses API `x_search` tool. This is not browser automation, scraping, or the X API v2 developer flow.
+
+It searches public X content through xAI, not your Home timeline or Following feed. For timeline-like searches, pass handles with `--handles`.
+
+Treat it as an experimental local utility: do not run it as a hosted service, collect other people's tokens, or bypass xAI/X limits.
 
 ## Prerequisites
 
 - Node.js 18 or newer.
-- `git` and `bash`.
-- An eligible Grok, SuperGrok, or X Premium account.
+- An eligible Grok, SuperGrok, or X Premium account. Entitlement is set by xAI/X; use Premium+ for higher Grok limits.
 - Shell access on a machine that can open or copy the xAI device-code login URL.
 
-## Install
+Usage is subject to xAI/X quotas, rate limits, pricing, and account policies.
 
-After the package is published to npm:
+## Install
 
 ```bash
 npm install -g @yjsoon/xsearch
@@ -36,7 +51,7 @@ xsearch --help
 xsearch settings
 ```
 
-For local development from this repository:
+For local development from this repository instead:
 
 ```bash
 git clone https://github.com/yjsoon/xai-xsearch.git ~/Developer/personal-projects/xai-xsearch
@@ -92,6 +107,14 @@ xsearch refresh
 
 Tokens are stored at `~/.agents/tools/xai-xsearch/.auth/xai-oauth.json` with owner-only file permissions when the script creates the file. Treat it as a credential.
 
+The default login uses xAI's shared OAuth client and requests:
+
+```text
+openid profile email offline_access grok-cli:access api:access
+```
+
+You can override the OAuth client ID and scopes through environment variables if xAI changes the shared flow or you have your own client.
+
 To inspect paths, endpoint, model, and environment overrides:
 
 ```bash
@@ -120,6 +143,12 @@ xsearch search "WWDC reactions from Apple developers" \
   --handles apple,gruber
 ```
 
+For a timeline-like view over accounts you already care about, pass those accounts explicitly:
+
+```bash
+xsearch search "latest posts about AI tools" --handles xai,openai,anthropic
+```
+
 Other options:
 
 ```bash
@@ -131,6 +160,14 @@ Other options:
 ```
 
 Do not pass `--handles` and `--exclude` together; xAI does not allow both filters in the same request.
+
+## Safety and Policy Notes
+
+- Read-only: searches via xAI; never posts, likes, follows, DMs, or mutates your account.
+- Your token stays local. Do not paste it into chats, logs, issues, or hosted services.
+- Authenticate with your own account; do not share tokens or proxy searches.
+- Stay within xAI/X limits; on entitlement, quota, or policy errors, resolve with xAI/X rather than retrying hard.
+- Unofficial: xAI/X may change endpoints, scopes, limits, or policy without notice.
 
 ## Environment
 
