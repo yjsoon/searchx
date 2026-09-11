@@ -14,7 +14,7 @@ function request(method, url, body, token) {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
-        'User-Agent': 'xsearch/0.1',
+        'User-Agent': 'searchx/0.1',
       },
     };
 

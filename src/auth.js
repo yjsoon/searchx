@@ -3,7 +3,7 @@ const path = require('path');
 const https = require('https');
 
 const TOKEN_FILE = process.env.XAI_OAUTH_TOKEN_FILE ||
-  path.join(process.env.HOME, '.agents/tools/xai-xsearch/.auth/xai-oauth.json');
+  path.join(process.env.HOME, '.agents/tools/searchx/.auth/xai-oauth.json');
 
 const AUTH_BASE = 'https://auth.x.ai';
 const DEVICE_CODE_URL = `${AUTH_BASE}/oauth2/device/code`;
@@ -22,7 +22,7 @@ function request(method, url, body, headers = {}) {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Accept': 'application/json',
-        'User-Agent': 'xsearch/0.1',
+        'User-Agent': 'searchx/0.1',
         ...headers,
       },
     };
@@ -81,16 +81,16 @@ function getAuthSettings() {
 function loadAccessToken() {
   const tokens = loadTokens();
   if (!tokens) {
-    throw new Error('No OAuth token found. Run: xsearch auth login');
+    throw new Error('No OAuth token found. Run: searchx auth login');
   }
   if (tokens.expires_at && Date.now() > tokens.expires_at) {
-    throw new Error('Token expired. Run: xsearch auth refresh');
+    throw new Error('Token expired. Run: searchx auth refresh');
   }
   return tokens.access_token;
 }
 
 async function login() {
-  console.log('Starting xAI device code login (uses your X Premium account)...\n');
+  console.log('Starting SpaceXAI device code login (uses your X Premium account)...\n');
 
   const params = new URLSearchParams({
     client_id: DEFAULT_CLIENT_ID,
@@ -160,7 +160,7 @@ async function login() {
 async function refresh() {
   const tokens = loadTokens();
   if (!tokens?.refresh_token) {
-    throw new Error('No refresh_token found. Run: xsearch auth login');
+    throw new Error('No refresh_token found. Run: searchx auth login');
   }
 
   const params = new URLSearchParams({
@@ -182,11 +182,11 @@ async function refresh() {
 function status() {
   const tokens = loadTokens();
   if (!tokens) {
-    console.log('No tokens stored. Run: xsearch auth login');
+    console.log('No tokens stored. Run: searchx auth login');
     return;
   }
   const expiresIn = Math.max(0, Math.floor((tokens.expires_at - Date.now()) / 1000 / 60));
-  console.log('xAI OAuth status:');
+  console.log('SpaceXAI OAuth status:');
   console.log(`  Obtained: ${tokens.obtained_at}`);
   console.log(`  Expires in: ~${expiresIn} minutes`);
   console.log(`  Has refresh_token: ${!!tokens.refresh_token}`);

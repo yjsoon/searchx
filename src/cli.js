@@ -68,27 +68,27 @@ function parseSearchArgs(args) {
 }
 
 function printUsage() {
-  console.log('Usage: xsearch <command> [options]');
+  console.log('Usage: searchx <command> [options]');
   console.log('');
   console.log('Commands:');
   console.log('  login                   Start device-code login');
   console.log('  status                  Show local OAuth token status');
   console.log('  refresh                 Refresh the OAuth token');
-  console.log('  search <query>          Search X with xAI x_search');
+  console.log('  search <query>          Search X with SpaceXAI x_search');
   console.log('  settings                Show paths, model, endpoint, and environment overrides');
   console.log('  help [command]          Show command help');
   console.log('');
   console.log('Examples:');
-  console.log('  xsearch login');
-  console.log('  xsearch status');
-  console.log('  xsearch search "What are people saying about xAI?"');
-  console.log('  xsearch "WWDC reactions from Apple developers" --since 2026-06-01 --handles apple,gruber');
-  console.log('  xsearch settings --json');
+  console.log('  searchx login');
+  console.log('  searchx status');
+  console.log('  searchx search "What are people saying about SpaceXAI?"');
+  console.log('  searchx "WWDC reactions from Apple developers" --since 2026-06-01 --handles apple,gruber');
+  console.log('  searchx settings --json');
 }
 
 function printSearchUsage() {
-  console.log('Usage: xsearch search "your search" [options]');
-  console.log('       xsearch "your search" [options]');
+  console.log('Usage: searchx search "your search" [options]');
+  console.log('       searchx "your search" [options]');
   console.log('');
   console.log('Options:');
   console.log('  --query, -q TEXT                  Search query');
@@ -98,19 +98,19 @@ function printSearchUsage() {
   console.log('  --exclude a,b                     Exclude these X handles');
   console.log('  --image, --images                 Enable image understanding');
   console.log('  --video, --videos                 Enable video understanding');
-  console.log('  --model MODEL                     Override xAI Responses model');
+  console.log('  --model MODEL                     Override SpaceXAI Responses model');
   console.log('  --max-output-tokens N             Override output token cap');
   console.log('  --json                            Print only the raw Responses API JSON to stdout');
   console.log('');
   console.log('Examples:');
-  console.log('  xsearch search "latest posts about Grok"');
-  console.log('  xsearch "shipping updates from xAI" --since 2026-06-01');
-  console.log('  xsearch "from selected accounts" --handles xai,elonmusk --json');
+  console.log('  searchx search "latest posts about Grok"');
+  console.log('  searchx "shipping updates from SpaceXAI" --since 2026-06-01');
+  console.log('  searchx "from selected accounts" --handles xai,elonmusk --json');
 }
 
 function printAuthUsage() {
-  console.log('Usage: xsearch auth [login | status | refresh]');
-  console.log('       xsearch login | status | refresh');
+  console.log('Usage: searchx auth [login | status | refresh]');
+  console.log('       searchx login | status | refresh');
   console.log('');
   console.log('Commands:');
   console.log('  login       Start device-code login');
@@ -121,7 +121,7 @@ function printAuthUsage() {
 }
 
 function printSettingsUsage() {
-  console.log('Usage: xsearch settings [--json]');
+  console.log('Usage: searchx settings [--json]');
   console.log('');
   console.log('Shows local token path, token presence, API base, default model, and environment overrides.');
   console.log('');
@@ -130,7 +130,7 @@ function printSettingsUsage() {
 
 function printEnvironmentHelp() {
   console.log('Environment:');
-  console.log('  XAI_OAUTH_CLIENT_ID     Override the shared xAI OAuth client ID');
+  console.log('  XAI_OAUTH_CLIENT_ID     Override the shared SpaceXAI OAuth client ID');
   console.log('  XAI_OAUTH_SCOPE         Override requested OAuth scopes');
   console.log('  XAI_OAUTH_TOKEN_FILE    Override token file path');
   console.log('  XAI_API_BASE            Override Responses API base URL');
@@ -184,7 +184,7 @@ function printSettings(args = []) {
     return;
   }
 
-  console.log('xsearch settings:');
+  console.log('searchx settings:');
   console.log(`  API base: ${settings.apiBase}`);
   console.log(`  Default model: ${settings.defaultModel}`);
   console.log(`  Token file: ${settings.tokenFile}`);

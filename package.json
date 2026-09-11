@@ -1,17 +1,17 @@
 {
-  "name": "@yjsoon/xsearch",
+  "name": "@yjsoon/searchx",
   "version": "0.1.0",
-  "description": "Native X search CLI backed by xAI OAuth and the x_search Responses tool.",
+  "description": "Native X search CLI backed by SpaceXAI OAuth and the x_search Responses tool.",
   "license": "MIT",
   "type": "commonjs",
   "publishConfig": {
     "access": "public"
   },
   "bin": {
-    "xsearch": "./bin/xsearch.js"
+    "searchx": "bin/searchx.js"
   },
   "scripts": {
-    "check": "node scripts/xai-oauth.js --status && node scripts/xai-search.js --help && node bin/xsearch.js --help"
+    "check": "node scripts/xai-oauth.js --status && node scripts/xai-search.js --help && node bin/searchx.js --help"
   },
   "engines": {
     "node": ">=18"
