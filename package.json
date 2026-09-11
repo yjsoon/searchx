@@ -1,6 +1,6 @@
 {
   "name": "@yjsoon/searchx",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Native X search CLI backed by SpaceXAI OAuth and the x_search Responses tool.",
   "license": "MIT",
   "type": "commonjs",
